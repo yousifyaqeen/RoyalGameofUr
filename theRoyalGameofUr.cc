@@ -4,230 +4,194 @@
 #include <gf/Sprite.h>
 #include <gf/Text.h>
 #include <gf/Window.h>
-#include <gf/SystemInfo.h>
+#include <string>
 #include <iostream>
 #include <gf/Shapes.h>
 #include <array>
 #include <gf/ResourceManager.h>
+#include "Position2i.h"
+#include "Player.h"
+#include "Tile.h"
+#include "Random.h"
+
+
+
 const static int wWidth = 1020;
 const static int wHieght = 600;
 const static int numTiles = 8;
 const static float Board_square_size = 100.0f;
-struct Position{
-
-    int x;
-    int y;
-
-};
-class Player{
-private:
-     static int id;
-     static std::array<bool, numTiles> tile;
-     static std::array<Position, numTiles> pos;
-     static int score;
-public:
-     Player(){
-       for(int i=0;i<numTiles;i++){
-        tile.at(i)=true;
-        pos[i].x=0;
-        pos[i].y=0;
-      }
-     }
-
-     Position getPosition(int index){
-       if(index<pos.size())
-       return pos[index];
-     }
-
-     void setPosition(int index, int x ,int y){
-       pos[index].x=x;
-       pos[index].y=y;
-     }
-
-     void killTile(int index){
-       tile.at(index)=false;
-     }
-
-     bool tileAlive(int index){
-       return tile.at(index);
-     }
-
-     void increaseScore(){
-        score+=1;
-     }
-
-     int getScore(){
-       return score;
-     }
-};
 
 int main() {
-  int Board [][8]  = {
-    {4,2,1,2,0,0,4,5},
-    {6,1,3,4,1,3,2,1},
-    {4,2,1,2,0,0,4,5}};
-
-    // Create the main window and the renderer
-    gf::Window window("the royal game of ur", { wWidth, wHieght});
-    gf::RenderWindow renderer(window);
-
-  /*using the resource manager to load textures
-  * very well organised and more readable code
-  * and all resources are in the same place
-  */
-
-    gf::ResourceManager resources;
-    resources.addSearchDir("./res");
-    gf::Font& font = resources.getFont("asvcodar-lt-bold.ttf");
-    gf::Texture& eyest = resources.getTexture("1.png");
-    gf::Texture& pointat = resources.getTexture("2.png");
-    gf::Texture& pointst = resources.getTexture("3.png");
-    gf::Texture& anothert = resources.getTexture("4.png");
-    gf::Texture& end4pointst = resources.getTexture("5.png");
-    gf::Texture& cantdie = resources.getTexture("6.png");
-    gf::Texture& player1 = resources.getTexture("p1.png");
-    gf::Texture& player2 = resources.getTexture("p2.png");
+  int BoardArray[24]  =
+  { 4,2,1,2,0,0,4,5,
+    6,1,3,4,1,3,2,1,
+    4,2,1,2,0,0,4,5};
+    int BoardPlayerArray[24]  =
+    { 1,1,1,1,0,0,1,1,
+      3,3,3,3,3,3,3,3,
+      2,2,2,2,0,0,2,2};
+      int pathArray[24]  =
+      { 4,3,2,1,16,15,14,13,
+        5,6,7,8,9,10,11,12,
+        4,3,2,1,16,15,14,13};
 
 
-    gf::Text text("The Royal Game Of UR", font);
-    text.setPosition({ (window.getSize().x - text.getLocalBounds().width)/2, text.getLocalBounds().height });
-    text.setCharacterSize(30);
-    text.setColor(gf::Color::Red);
+        gf::Matrix<int, 3, 8> displayMatrix(BoardArray);
+        // Create the main window and the renderer
+        gf::Window window("the royal game of ur", { wWidth, wHieght});
+        gf::RenderWindow renderer(window);
+
+        /*using the resource manager to load textures
+        * very well organised and more readable code
+        * and all resources are in the same place
+        */
+
+        gf::ResourceManager resources;
+        resources.addSearchDir("./res");
+        gf::Font& font = resources.getFont("asvcodar-lt-bold.ttf");
+        gf::Texture& eyest = resources.getTexture("1.png");
+        gf::Texture& pointat = resources.getTexture("2.png");
+        gf::Texture& pointst = resources.getTexture("3.png");
+        gf::Texture& anothert = resources.getTexture("4.png");
+        gf::Texture& end4pointst = resources.getTexture("5.png");
+        gf::Texture& cantdie = resources.getTexture("6.png");
+        gf::Texture& player1 = resources.getTexture("p1.png");
+        gf::Texture& player2 = resources.getTexture("p2.png");
 
 
+        gf::Text text("The Royal Game Of UR", font);
+        text.setPosition({ (window.getSize().x - text.getLocalBounds().width)/2, text.getLocalBounds().height });
+        text.setCharacterSize(30);
+        text.setColor(gf::Color::Red);
 
-    gf::RectangleShape tile[24];
-    int currentTile        = 0;
-    float totalWidth = ((wWidth/2)-(8*((Board_square_size+4)/2)));
-    float totalHeight = ((wHieght/2)-(3*((Board_square_size+4)/2)));
-    for(int i          = 0;i<3;i++){
-      for(int j        = 0;j<8;j++){
+        gf::RectangleShape tile[24];
+        Tile tiles[24];
+        Position2i currentOnBoardPos(0,0);
+        float currentX;
+        float currentY;
+        int currentTile        = 0;
+        float totalWidth = ((wWidth/2)-(8*((Board_square_size+4)/2)));
+        float totalHeight = ((wHieght/2)-(3*((Board_square_size+4)/2)));
+        for(int i          = 0;i<3;i++){
+          for(int j        = 0;j<8;j++){
+            currentOnBoardPos.setPosition(i,j);
+            currentX=(totalWidth + ((Board_square_size + 4) * j))+0.0f;
+            currentY=(totalHeight + ((Board_square_size+ 4)*i));
+            tiles[currentTile].set(currentTile,Board_square_size,Board_square_size,currentX,currentY, currentOnBoardPos,1);
+            tile[currentTile].setSize({ tiles[currentTile].getWidth(), tiles[currentTile].getHeight() });
+            tile[currentTile].setPosition({tiles[currentTile].getPositionX(),tiles[currentTile].getPositionY()});
+            tile[currentTile].setOutlineColor(gf::Color::Blue);
+            tile[currentTile].setOutlineThickness(4);
+            switch (displayMatrix.grid[i][j]) {
+              case 0:
+                tile[currentTile].setColor(gf::Color::White);
+                tile[currentTile].setOutlineColor(gf::Color::Blue);
+                tile[currentTile].setOutlineThickness(0);
+                break;
+              case 1:
+                tile[currentTile].setTexture(pointat);
+                break;
+              case 2:
+                tile[currentTile].setTexture(eyest);
+                break;
+              case 3:
+                tile[currentTile].setTexture(pointst);
+                break;
+              case 4:
+                tile[currentTile].setTexture(anothert);
+                break;
+              case 5:
+                tile[currentTile].setTexture(end4pointst);
+                break;
+              case 6:
+                tile[currentTile].setTexture(cantdie);
+                break;
+            }
+            currentTile++;
 
-        tile[currentTile].setSize({ Board_square_size, Board_square_size });
-        tile[currentTile].setPosition({totalWidth + ((tile[currentTile].getSize().width + 4) * j),totalHeight + (tile[currentTile].getSize().height + 4)*i });
-        tile[currentTile].setOutlineColor(gf::Color::Blue);
-        tile[currentTile].setOutlineThickness(4);
-
-        if(Board[i][j] ==0){
-          tile[currentTile].setColor(gf::Color::White);
-          tile[currentTile].setOutlineColor(gf::Color::Blue);
-          tile[currentTile].setOutlineThickness(0);
-        }else
-        if(Board[i][j]     ==1){
-
-          tile[currentTile].setTexture(pointat);
-        }else
-        if(Board[i][j]     ==2){
-
-          tile[currentTile].setTexture(eyest);
-
-        }else
-        if(Board[i][j]     ==3){
-
-          tile[currentTile].setTexture(pointst);
-        }else
-        if(Board[i][j]     ==4){
-
-          tile[currentTile].setTexture(anothert);
-
-        }else
-        if(Board[i][j]     ==5){
-
-          tile[currentTile].setTexture(end4pointst);
-        }else
-        if(Board[i][j]     ==6){
-
-          tile[currentTile].setTexture(cantdie);
+          }
         }
-
-        currentTile++;
-
-      }
-    }
-
-
-    gf::CircleShape piece1[numTiles];
-    for(int i=0;i<numTiles;i++){
-      piece1[i].setRadius(30);
-      piece1[i].setPosition({ 100.0f +(60*i), 30.0f });
-      piece1[i].setTexture(player1);
-    }
-
-
-    gf::CircleShape piece2[numTiles];
-    for(int i=0;i<numTiles;i++){
-      piece2[i].setRadius(30);
-      piece2[i].setPosition({ 100.0f +(60*i), wHieght-60.0f-30 });
-      piece2[i].setTexture(player2);
-    }
-
-
-
-    renderer.clear(gf::Color::White);
-
-    // Start the game loop
-    bool chose = true;
-    int current = 0;
-    int MouseX = 0;
-    int MouseY = 0;
-    while (window.isOpen()) {
-      // Process events
-      for(int i          = 0 ; i<3;i++){
-        for(int j        = 0;j<8;j++){
-
+        Piece piece1[numTiles];
+        for(int i=0;i<numTiles;i++){
+          piece1[i].setRadius(30);
+          piece1[i].setPosition({ 100.0f +(60*i), 30.0f });
+          piece1[i].setColor(gf::Color::Red);
         }
-      }
-      gf::Event event;
-
-      while (window.pollEvent(event)) {
-
-
-        switch (event.type) {
-          case gf::EventType::Closed:
-          window.close();
-          break;
-          case gf::EventType::MouseButtonPressed:
-        if(chose){
-            for(int i =0;i<numTiles;i++){
-              if(event.mouseButton.coords.x<piece1[i].getPosition().x+piece1[i].getLocalBounds().width &&event.mouseButton.coords.x>piece1[i].getPosition().x
-              &&event.mouseButton.coords.y<piece1[i].getPosition().y+piece1[i].getLocalBounds().height&&event.mouseButton.coords.y>piece1[i].getPosition().y){
-              current = i;
-              std::cout << "current " << i << "\n";
-              chose = false;
+        Piece piece2[numTiles];
+        for(int i=0;i<numTiles;i++){
+          piece2[i].setRadius(30);
+          piece2[i].setPosition(gf::Vector2f{ 100.0f +(60*i), wHieght-60.0f-30 });
+          piece2[i].setColor(gf::Color::Black);
+        }
+        gf::Text DiceText("You Got", font);
+        DiceText.setPosition({ ((window.getSize().x/4)+(window.getSize().x/2)) - (DiceText.getLocalBounds().width/2), DiceText.getLocalBounds().height });
+        DiceText.setCharacterSize(30);
+        DiceText.setColor(gf::Color::Red);
+        renderer.clear(gf::Color::White);
+        // Start the game loop
+        bool chose = true;
+        bool p1 = true;
+        int current = 0;
+        int MouseX = 0;
+        int MouseY = 0;
+        int throwDice=0;
+        auto  thrw = true;
+        while (window.isOpen()) {
+          // Process events
+          gf::Event event;
+          while (window.pollEvent(event)) {
+            if(thrw){
+              throwDice = Random::RandomIntBetween(1,5) ;
+              DiceText.setString(std::to_string(throwDice));
+              printf("random %d\n",throwDice );
+              thrw = false;
+            }
+            switch (event.type) {
+              case gf::EventType::Closed:
+              window.close();
+              break;
+              case gf::EventType::MouseButtonPressed:
+              if(p1){
+                for(int i =0;i<numTiles;i++){
+                  if(event.mouseButton.coords.x<piece1[i].getPosition().x+piece1[i].getLocalBounds().width &&event.mouseButton.coords.x>piece1[i].getPosition().x
+                  &&event.mouseButton.coords.y<piece1[i].getPosition().y+piece1[i].getLocalBounds().height&&event.mouseButton.coords.y>piece1[i].getPosition().y){
+                    current = i;
+                    piece1[current].setOnBoardPosition(piece1[current].getOnBoardPosition1D()+throwDice);
+                    int newpos =piece1[current].Search(pathArray,24,piece1[current].getOnBoardPosition1D()-1);
+                    piece1[current].setPosition(gf::Vector2f(tile[newpos].getPosition().x + 19,tile[newpos].getPosition().y + 19));
+                    thrw = true;
+                    p1=false;
+                  }
+                }
+              }else{
+                for(int i =0;i<numTiles;i++){
+                  if(event.mouseButton.coords.x<piece2[i].getPosition().x+piece2[i].getLocalBounds().width &&event.mouseButton.coords.x>piece2[i].getPosition().x
+                  &&event.mouseButton.coords.y<piece2[i].getPosition().y+piece2[i].getLocalBounds().height&&event.mouseButton.coords.y>piece2[i].getPosition().y){
+                    current = i;
+                    piece2[current].setOnBoardPosition(piece1[current].getOnBoardPosition1D()+throwDice);
+                    int newpos =piece2[current].SearchEnd(pathArray,24,piece2[current].getOnBoardPosition1D()-1);
+                    piece2[current].setPosition(gf::Vector2f(tile[newpos].getPosition().x + 19,tile[newpos].getPosition().y + 19));
+                    thrw = true;
+                    p1=true;
+                  }
+                }
+              }
+              break;
+            }
+          };
+          renderer.clear();
+          for(int i = 0;i<24;i++){
+            renderer.draw(tile[i]);
+          }
+          for(int i = 0;i<24;i++){
+            if(i<numTiles) {
+              piece1[i].render(renderer);
+              piece2[i].render(renderer);
             }
           }
-        }else{
-
-          for(int i =0;i<24;i++){
-            if(event.mouseButton.coords.x<tile[i].getPosition().x+tile[i].getLocalBounds().width &&event.mouseButton.coords.x>tile[i].getPosition().x
-            &&event.mouseButton.coords.y<tile[i].getPosition().y+tile[i].getLocalBounds().height&&event.mouseButton.coords.y>tile[i].getPosition().y){
-            piece1[current].setPosition(gf::Vector2f(tile[i].getPosition().x + 19,tile[i].getPosition().y + 19));
-
-          }
+          renderer.draw(DiceText);
+          renderer.draw(text);
+          renderer.display();
         }
-              chose = true;
-        }
-
-            break;
-        }
+        return 0;
       }
-
-      renderer.clear();
-      for(int i = 0;i<24;i++){
-          renderer.draw(tile[i]);
-      }
-      for(int i = 0;i<24;i++){
-        if(i<numTiles) {
-          renderer.draw(piece1[i]);
-          renderer.draw(piece2[i]);
-
-        }
-      }
-
-
-
-      renderer.display();
-    }
-
-    return 0;
-  }

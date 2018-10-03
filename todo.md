@@ -1,0 +1,4 @@
+- [ ] add playing algorithme
+- [ ] add reademe file
+- [ ] add licence
+- [x] use gf matrix
