@@ -9,10 +9,10 @@
 #include <gf/Shapes.h>
 #include <array>
 #include <gf/ResourceManager.h>
-#include "Position2i.h"
-#include "Player.h"
-#include "Tile.h"
-#include "Random.h"
+#include "src/Position2i.h"
+#include "src/Player.h"
+#include "src/Tile.h"
+#include "src/Random.h"
 
 
 
@@ -168,7 +168,7 @@ int main() {
                       }
 
                     }
-                     break; 
+                     break;
                   }
                 }
               }else{

@@ -5,10 +5,10 @@ project(theRoyalGameofUr
 find_package(gf REQUIRED)
 add_executable(theRoyalGameofUr
   theRoyalGameofUr.cc
-  Tile.cc
-  Position2i.cc
-  Random.cc
-  Piece.cc
+  src/Tile.cc
+  src/Position2i.cc
+  src/Random.cc
+  src/Piece.cc
   # and the rest of your sources
 )
 target_link_libraries(theRoyalGameofUr

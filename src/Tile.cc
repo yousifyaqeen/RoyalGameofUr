@@ -35,7 +35,6 @@
     shape.setOutlineThickness(m_outlineThickness);
 
     shape.setTexture(*m_texture);
-   // m_LocalBounds = shape.getLocalBounds();
 
     target.draw(shape);
 
