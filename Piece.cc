@@ -6,9 +6,7 @@
    gf::CircleShape shape;
    shape.setPosition(m_position);
    shape.setRadius(m_radius);
-   shape.setColor(m_color);
-   //shape.setTexture(&m_texture);
-  // m_LocalBounds = shape.getLocalBounds();
+   shape.setTexture(*m_texture);
 
    target.draw(shape);
 
@@ -18,7 +16,6 @@ gf::RectF Piece::getLocalBounds(){
   gf::CircleShape shape;
   shape.setPosition(m_position);
   shape.setRadius(m_radius);
-  shape.setColor(m_color);
   return shape.getLocalBounds();
 
 }
@@ -35,7 +32,7 @@ void Piece::set(int id,float width,float height,float x,float y,Position2i pos){
 /*void  setTexture(gf::Texture texture){
   m_texture=texture;
 }*/
-Piece::Piece(){
+Piece::Piece():m_texture(nullptr){
   gf::Vector2f tmp({0.f,0.f});
   this->id=0;
   this->width=0;
@@ -44,8 +41,8 @@ Piece::Piece(){
   this->y=0;
   this->m_position = tmp;
   this->m_radius = 0.f;
-  m_color= gf::Color::Red;
   pos_1D=1;
+  dead=false;
 
 }
 size_t Piece::Search(const int *self,size_t size, int value) {
@@ -71,6 +68,9 @@ size_t Piece::SearchEnd(const int *self,size_t size, int value) {
 void         Piece::setPosition(Position2i pos){this->x=pos.getPositionX(); this->y=pos.getPositionY();}*/
 float        Piece::setSize(float height, float width){this->height=height; this->width=width;}
 void         Piece::setId(int id){this->id=id;}
+void         Piece::Die(){dead=true;}
+bool         Piece::Alive(){return dead;}
+void         Piece::setTexture(gf::Texture& texture){m_texture=&texture;};
 void         Piece::setOnBoardPosition(Position2i pos){this->pos=pos;}
 void         Piece::setOnBoardPosition(int x,int y){this->pos.setPosition(x,y);}
 void         Piece::setOnBoardPosition(int x){this->pos_1D=x;}

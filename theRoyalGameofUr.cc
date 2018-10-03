@@ -34,7 +34,8 @@ int main() {
       { 4,3,2,1,16,15,14,13,
         5,6,7,8,9,10,11,12,
         4,3,2,1,16,15,14,13};
-
+      int firstfour[4] = {0,0,0,0};
+      int secondfour[4] = {0,0,0,0};
 
         gf::Matrix<int, 3, 8> displayMatrix(BoardArray);
         // Create the main window and the renderer
@@ -58,13 +59,11 @@ int main() {
         gf::Texture& player1 = resources.getTexture("p1.png");
         gf::Texture& player2 = resources.getTexture("p2.png");
 
-
         gf::Text text("The Royal Game Of UR", font);
         text.setPosition({ (window.getSize().x - text.getLocalBounds().width)/2, text.getLocalBounds().height });
         text.setCharacterSize(30);
         text.setColor(gf::Color::Red);
 
-        gf::RectangleShape tile[24];
         Tile tiles[24];
         Position2i currentOnBoardPos(0,0);
         float currentX;
@@ -75,36 +74,33 @@ int main() {
         for(int i          = 0;i<3;i++){
           for(int j        = 0;j<8;j++){
             currentOnBoardPos.setPosition(i,j);
-            currentX=(totalWidth + ((Board_square_size + 4) * j))+0.0f;
+            currentX=(totalWidth + ((Board_square_size + 4) * j));
             currentY=(totalHeight + ((Board_square_size+ 4)*i));
             tiles[currentTile].set(currentTile,Board_square_size,Board_square_size,currentX,currentY, currentOnBoardPos,1);
-            tile[currentTile].setSize({ tiles[currentTile].getWidth(), tiles[currentTile].getHeight() });
-            tile[currentTile].setPosition({tiles[currentTile].getPositionX(),tiles[currentTile].getPositionY()});
-            tile[currentTile].setOutlineColor(gf::Color::Blue);
-            tile[currentTile].setOutlineThickness(4);
+
             switch (displayMatrix.grid[i][j]) {
               case 0:
-                tile[currentTile].setColor(gf::Color::White);
-                tile[currentTile].setOutlineColor(gf::Color::Blue);
-                tile[currentTile].setOutlineThickness(0);
+                tiles[currentTile].setColor(gf::Color::White);
+                tiles[currentTile].setOutlineColor(gf::Color::Blue);
+                tiles[currentTile].setOutlineThickness(0);
                 break;
               case 1:
-                tile[currentTile].setTexture(pointat);
+                tiles[currentTile].setTexture(pointat);
                 break;
               case 2:
-                tile[currentTile].setTexture(eyest);
+                tiles[currentTile].setTexture(eyest);
                 break;
               case 3:
-                tile[currentTile].setTexture(pointst);
+                tiles[currentTile].setTexture(pointst);
                 break;
               case 4:
-                tile[currentTile].setTexture(anothert);
+                tiles[currentTile].setTexture(anothert);
                 break;
               case 5:
-                tile[currentTile].setTexture(end4pointst);
+                tiles[currentTile].setTexture(end4pointst);
                 break;
               case 6:
-                tile[currentTile].setTexture(cantdie);
+                tiles[currentTile].setTexture(cantdie);
                 break;
             }
             currentTile++;
@@ -115,13 +111,13 @@ int main() {
         for(int i=0;i<numTiles;i++){
           piece1[i].setRadius(30);
           piece1[i].setPosition({ 100.0f +(60*i), 30.0f });
-          piece1[i].setColor(gf::Color::Red);
+          piece1[i].setTexture(player1);
         }
         Piece piece2[numTiles];
         for(int i=0;i<numTiles;i++){
           piece2[i].setRadius(30);
           piece2[i].setPosition(gf::Vector2f{ 100.0f +(60*i), wHieght-60.0f-30 });
-          piece2[i].setColor(gf::Color::Black);
+          piece2[i].setTexture(player2);
         }
         gf::Text DiceText("You Got", font);
         DiceText.setPosition({ ((window.getSize().x/4)+(window.getSize().x/2)) - (DiceText.getLocalBounds().width/2), DiceText.getLocalBounds().height });
@@ -143,7 +139,7 @@ int main() {
             if(thrw){
               throwDice = Random::RandomIntBetween(1,5) ;
               DiceText.setString(std::to_string(throwDice));
-              printf("random %d\n",throwDice );
+            //  printf("random %d\n",throwDice );
               thrw = false;
             }
             switch (event.type) {
@@ -155,33 +151,53 @@ int main() {
                 for(int i =0;i<numTiles;i++){
                   if(event.mouseButton.coords.x<piece1[i].getPosition().x+piece1[i].getLocalBounds().width &&event.mouseButton.coords.x>piece1[i].getPosition().x
                   &&event.mouseButton.coords.y<piece1[i].getPosition().y+piece1[i].getLocalBounds().height&&event.mouseButton.coords.y>piece1[i].getPosition().y){
-                    current = i;
-                    piece1[current].setOnBoardPosition(piece1[current].getOnBoardPosition1D()+throwDice);
-                    int newpos =piece1[current].Search(pathArray,24,piece1[current].getOnBoardPosition1D()-1);
-                    piece1[current].setPosition(gf::Vector2f(tile[newpos].getPosition().x + 19,tile[newpos].getPosition().y + 19));
-                    thrw = true;
-                    p1=false;
+                    if(!piece1[i].Alive()){
+                      piece1[i].setOnBoardPosition(piece1[i].getOnBoardPosition1D()+throwDice);
+                      int newpos =piece1[i].Search(pathArray,24,piece1[i].getOnBoardPosition1D()-1);
+
+                      if(piece1[i].getOnBoardPosition1D()-1<15){
+                        piece1[i].setPosition(gf::Vector2f(tiles[newpos].getPosition().x + 19,tiles[newpos].getPosition().y + 19));
+                        thrw = true;
+                        p1=false;
+
+                      }else{
+                        piece1[i].setPosition(gf::Vector2f(tiles[5].getPosition().x + 19,tiles[5].getPosition().y + 19));
+                        thrw = true;
+                        p1=false;
+                        piece1[i].Die();
+                      }
+
+                    }
+                     break; 
                   }
                 }
               }else{
                 for(int i =0;i<numTiles;i++){
                   if(event.mouseButton.coords.x<piece2[i].getPosition().x+piece2[i].getLocalBounds().width &&event.mouseButton.coords.x>piece2[i].getPosition().x
                   &&event.mouseButton.coords.y<piece2[i].getPosition().y+piece2[i].getLocalBounds().height&&event.mouseButton.coords.y>piece2[i].getPosition().y){
-                    current = i;
-                    piece2[current].setOnBoardPosition(piece1[current].getOnBoardPosition1D()+throwDice);
-                    int newpos =piece2[current].SearchEnd(pathArray,24,piece2[current].getOnBoardPosition1D()-1);
-                    piece2[current].setPosition(gf::Vector2f(tile[newpos].getPosition().x + 19,tile[newpos].getPosition().y + 19));
-                    thrw = true;
-                    p1=true;
+                  if(!piece2[i].Alive()){
+                    piece2[i].setOnBoardPosition(piece2[i].getOnBoardPosition1D()+throwDice);
+                    int newpos =piece2[i].SearchEnd(pathArray,24,piece2[i].getOnBoardPosition1D()-1);
+                    if(piece2[i].getOnBoardPosition1D()-1<15){
+                      piece2[i].setPosition(gf::Vector2f(tiles[newpos].getPosition().x + 19,tiles[newpos].getPosition().y + 19));
+                      thrw = true;
+                      p1=true;
+                    }else{
+                      piece2[i].setPosition(gf::Vector2f(tiles[21].getPosition().x + 19,tiles[21].getPosition().y + 19));
+                      thrw = true;
+                      p1=true;
+                      piece2[i].Die();
                   }
+                 }
                 }
+               }
               }
               break;
             }
           };
           renderer.clear();
           for(int i = 0;i<24;i++){
-            renderer.draw(tile[i]);
+              tiles[i].render(renderer);
           }
           for(int i = 0;i<24;i++){
             if(i<numTiles) {
