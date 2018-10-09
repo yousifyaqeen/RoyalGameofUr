@@ -1,9 +1,12 @@
 # RoyalGameofUr
 
-## this project is using the gf library see (gf link)
+## this project is using the gf library see
+
+  https://github.com/GamedevFramework/gf
+
 
 ## how to play
-- clone the repo
+- $ git clone https://github.com/yousifyaqeen/RoyalGameofUr.git
 - $ cd RoyalGameofUr
 - $ mkdir Build
 - $ cd Build
