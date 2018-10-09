@@ -6,3 +6,4 @@
 - [ ] add reademe file
 - [ ] add licence
 - [x] use gf matrix
+- [ ] add Boarder Enable Disable to tile

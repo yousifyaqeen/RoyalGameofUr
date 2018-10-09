@@ -21,9 +21,13 @@ private:
   int pos_1D;//on Board
   gf::Vector2f m_position; // center of the square
   float m_radius;
-  //gf::Texture m_texture;
   gf::Color4f m_color;
   gf::Texture *m_texture;
+  gf::Color4f m_shadowColor;
+  gf::Vector2f m_shadowSize;
+  float m_shadowRadius;
+  gf::Vector2f m_shadowPosition;
+  bool m_drawshadow;
 
 public:
   bool        Alive();

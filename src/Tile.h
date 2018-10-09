@@ -19,11 +19,22 @@ private:
   Position2i pos;//on matrix
   int capacity;
   gf::Texture *m_texture;
+  gf::Color4f m_shadowColor;
+  gf::Vector2f m_shadowSize;
+gf::Vector2f  m_shadowPosition;
+bool m_drawshadow;
 
 public:
   void         render(gf::RenderTarget& target);
   Tile();
-  void setPosition(gf::Vector2f pos);
+  void         drawShadow();
+  void         drawShadow(gf::Vector2f shadowPosition,gf::Vector2f shadowSize,gf::Color4f shadowColor);
+  void         unDrawShadow();
+  void         setShadowSize(gf::Vector2f shadowSize);
+  void         setShadowPosition(gf::Vector2f shadowPosition);
+  void         setShadowColor(gf::Color4f shadowColor);
+  bool         getShadow();
+  void         setPosition(gf::Vector2f pos);
   gf::Vector2f getPosition();
   void         setTexture(gf::Texture& texture);
   void         setColor(gf::Color4f color);
@@ -32,6 +43,7 @@ public:
   void         set(int id,float width,float height,float x,float y,Position2i pos,int capacity);
   float        getPositionX();
   float        getPositionY();
+  
   void         setPosition(float x,float y);
   float        getHeight();
   float        getWidth();

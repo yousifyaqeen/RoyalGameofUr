@@ -7,7 +7,13 @@
    shape.setPosition(m_position);
    shape.setRadius(m_radius);
    shape.setTexture(*m_texture);
-
+   if(m_drawshadow){
+     gf::CircleShape shadow;
+     shadow.setPosition(m_shadowPosition);
+     shadow.setRadius(m_shadowRadius+2);
+     shadow.setColor(m_shadowColor);
+     target.draw(shadow);
+ }
    target.draw(shape);
 
  }
@@ -43,6 +49,7 @@ Piece::Piece():m_texture(nullptr){
   this->m_radius = 0.f;
   pos_1D=1;
   dead=false;
+  m_shadowColor = gf::Color::Black;
 
 }
 size_t Piece::Search(const int *self,size_t size, int value) {

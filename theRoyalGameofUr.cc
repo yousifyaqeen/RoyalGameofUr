@@ -24,7 +24,7 @@ const static float Board_square_size = 100.0f;
 int main() {
   int BoardArray[24]  =
   { 4,2,1,2,0,0,4,5,
-    6,1,3,4,1,3,2,1,
+    6,1,3,4,1,7,2,1,
     4,2,1,2,0,0,4,5};
     int BoardPlayerArray[24]  =
     { 1,1,1,1,0,0,1,1,
@@ -34,8 +34,12 @@ int main() {
       { 4,3,2,1,16,15,14,13,
         5,6,7,8,9,10,11,12,
         4,3,2,1,16,15,14,13};
-      int firstfour[4] = {0,0,0,0};
-      int secondfour[4] = {0,0,0,0};
+
+      bool isEmpty[24]=
+      {1,1,1,1,1,1,1,1,
+      1,1,1,1,1,1,1,1
+    ,1,1,1,1,1,1,1,1};
+      int OnTile[2]={0,0};
 
         gf::Matrix<int, 3, 8> displayMatrix(BoardArray);
         // Create the main window and the renderer
@@ -64,6 +68,10 @@ int main() {
         text.setCharacterSize(30);
         text.setColor(gf::Color::Red);
 
+
+
+
+
         Tile tiles[24];
         Position2i currentOnBoardPos(0,0);
         float currentX;
@@ -73,14 +81,19 @@ int main() {
         float totalHeight = ((wHieght/2)-(3*((Board_square_size+4)/2)));
         for(int i          = 0;i<3;i++){
           for(int j        = 0;j<8;j++){
+
             currentOnBoardPos.setPosition(i,j);
             currentX=(totalWidth + ((Board_square_size + 4) * j));
             currentY=(totalHeight + ((Board_square_size+ 4)*i));
             tiles[currentTile].set(currentTile,Board_square_size,Board_square_size,currentX,currentY, currentOnBoardPos,1);
-
+            tiles[currentTile].drawShadow();
+            tiles[currentTile].setShadowPosition(gf::Vector2f(currentX+15,currentY+15));
+            tiles[currentTile].setShadowSize(gf::Vector2f(Board_square_size+15,Board_square_size+15));
+            tiles[currentTile].setShadowColor(gf::Color::fromRgba32(130, 82, 1,255));
             switch (displayMatrix.grid[i][j]) {
               case 0:
-                tiles[currentTile].setColor(gf::Color::White);
+                tiles[currentTile].unDrawShadow();
+                tiles[currentTile].setColor(gf::Color::Transparent);
                 tiles[currentTile].setOutlineColor(gf::Color::Blue);
                 tiles[currentTile].setOutlineThickness(0);
                 break;
@@ -101,6 +114,9 @@ int main() {
                 break;
               case 6:
                 tiles[currentTile].setTexture(cantdie);
+                break;
+              case 7:
+                tiles[currentTile].setTexture(pointst);
                 break;
             }
             currentTile++;
@@ -152,22 +168,48 @@ int main() {
                   if(event.mouseButton.coords.x<piece1[i].getPosition().x+piece1[i].getLocalBounds().width &&event.mouseButton.coords.x>piece1[i].getPosition().x
                   &&event.mouseButton.coords.y<piece1[i].getPosition().y+piece1[i].getLocalBounds().height&&event.mouseButton.coords.y>piece1[i].getPosition().y){
                     if(!piece1[i].Alive()){
+                      int newpos =piece1[i].Search(pathArray,24,piece1[i].getOnBoardPosition1D()-1+throwDice);
+                    if(isEmpty[newpos]==1){
+                      isEmpty[newpos-throwDice]=1;
                       piece1[i].setOnBoardPosition(piece1[i].getOnBoardPosition1D()+throwDice);
-                      int newpos =piece1[i].Search(pathArray,24,piece1[i].getOnBoardPosition1D()-1);
+                      if(piece1[i].getOnBoardPosition1D()-1==7){
+                        OnTile[0]-=1;
+                      }
+                      if(piece1[i].getOnBoardPosition1D()-1==10){
+                        OnTile[1]-=1;
+                      }
 
                       if(piece1[i].getOnBoardPosition1D()-1<15){
-                        piece1[i].setPosition(gf::Vector2f(tiles[newpos].getPosition().x + 19,tiles[newpos].getPosition().y + 19));
-                        thrw = true;
+                        if(piece1[i].getOnBoardPosition1D()-1==7){
+                          OnTile[0]+=1;
+                          piece1[i].setPosition(gf::Vector2f(tiles[newpos].getPosition().x + 19 +(5*OnTile[0]),tiles[newpos].getPosition().y + 19 + (5*OnTile[0])));
+                          thrw = true;
+                          p1=false;
+
+                        }else if(piece1[i].getOnBoardPosition1D()-1==10){
+                          OnTile[1]+=1;
+                          piece1[i].setPosition(gf::Vector2f(tiles[newpos].getPosition().x + 19+(5*OnTile[1]),tiles[newpos].getPosition().y + 19 + (5*OnTile[1])));
+                          thrw = true;
                         p1=false;
+                        }else{
+                          printf("here \n"   );
+                          piece1[i].setPosition(gf::Vector2f(tiles[newpos].getPosition().x + 19,tiles[newpos].getPosition().y + 19));
+                          thrw = true;
+                        p1=false;
+                        printf("%d newpos \n",newpos   );
+                        isEmpty[newpos]=0;
+                        }
+
 
                       }else{
                         piece1[i].setPosition(gf::Vector2f(tiles[5].getPosition().x + 19,tiles[5].getPosition().y + 19));
                         thrw = true;
-                        p1=false;
+                       p1=false;
                         piece1[i].Die();
                       }
-
                     }
+                    }
+
                      break;
                   }
                 }
@@ -195,6 +237,7 @@ int main() {
               break;
             }
           };
+
           renderer.clear();
           for(int i = 0;i<24;i++){
               tiles[i].render(renderer);
