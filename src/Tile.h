@@ -24,43 +24,54 @@
 class Tile{
 private:
 
-  int id;
-  float width;
-  float height;
-  float x;//in the window
-  float y;//in the window
-  gf::Vector2f m_position;
-  gf::Color4f m_color;
+  int id; //each tile has it's own id
+  float width; // tile wodth
+  float height;// tile height
+  float x;//in the window (not used)
+  float y;//in the window (not used)
+
+  gf::Vector2f m_position; // position in the window
+  gf::Color4f m_color; //tile color (RectangleShape color)
   float m_outlineThickness;
   gf::Color4f m_outlineColor;
-  Position2i pos;//on matrix
-  int capacity;
-  gf::Texture *m_texture;
+  Position2i pos;//on matrix (not used)
+  int capacity; //not used
+  gf::Texture *m_texture; // the tile texture needs to be initialised
   gf::Color4f m_shadowColor;
   gf::Vector2f m_shadowSize;
-gf::Vector2f  m_shadowPosition;
-bool m_drawshadow;
+  gf::Vector2f  m_shadowPosition;
+  bool m_drawshadow;
 
 public:
+  //gf related functions
+  //similar to gf::RectangleShape
   void         render(gf::RenderTarget& target);
-  Tile();
-  void         drawShadow();
-  void         drawShadow(gf::Vector2f shadowPosition,gf::Vector2f shadowSize,gf::Color4f shadowColor);
-  void         unDrawShadow();
-  void         setShadowSize(gf::Vector2f shadowSize);
-  void         setShadowPosition(gf::Vector2f shadowPosition);
-  void         setShadowColor(gf::Color4f shadowColor);
-  bool         getShadow();
   void         setPosition(gf::Vector2f pos);
-  gf::Vector2f getPosition();
-  void         setTexture(gf::Texture& texture);
   void         setColor(gf::Color4f color);
-  void         setOutlineColor(gf::Color4f color);
+  void         setSize(gf::Vector2f size);
+  void         setTexture(gf::Texture& texture);
   void         setOutlineThickness(float thickness);
+  void         setOutlineColor(gf::Color4f color);
+  void         setShadowPosition(gf::Vector2f shadowPosition);
+  void         setShadowSize(gf::Vector2f shadowSize);
+  void         setShadowColor(gf::Color4f shadowColor);
+  gf::Vector2f getPosition();
+  // is the shadow set to be drawn ?
+  bool         getShadow();
+  //draw the shadow
+  void         drawShadow();
+  //set then draw the shadow
+  void         drawShadow(gf::Vector2f shadowPosition,gf::Vector2f shadowSize,gf::Color4f shadowColor);
+  //don't draw the shadow
+  void         unDrawShadow();
+
+//--------------------------------
+//initialising the tile
+//most of functions here are redundent and not used
+  Tile();
   void         set(int id,float width,float height,float x,float y,Position2i pos,int capacity);
   float        getPositionX();
   float        getPositionY();
-
   void         setPosition(float x,float y);
   float        getHeight();
   float        getWidth();
@@ -72,6 +83,5 @@ public:
   int          getOnBoardPositionY();
   void         setOnBoardPosition(Position2i pos);
   void         setOnBoardPosition(int x,int y);
-  void         setSize(gf::Vector2f size);
 };
 #endif
